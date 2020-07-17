@@ -16,7 +16,7 @@ def view_entry(request, title):
         return render(request, "encyclopedia/entry.html", {
         "entry": None,
         "title": title.capitalize()
-    })
+        })
     else:
         return render(request, "encyclopedia/entry.html", {
             "entry": markdown2.markdown(entry),
