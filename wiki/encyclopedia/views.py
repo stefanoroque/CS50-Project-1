@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django import forms
 from . import util
 import markdown2
+import random
 
 class NewTaskForm(forms.Form):
     entry_search = forms.CharField(label="Search Encyclopedia")
@@ -49,6 +50,7 @@ def entry_search(request):
             if search_keyword.upper() in (entry.upper() for entry in all_entries):
                 # Keyword matches exactly, render that page
                 return view_entry(request, search_keyword)
+                
 
             # Check for partial matches
             entry_subset = []
@@ -79,3 +81,15 @@ def entry_search(request):
     return render(request, "encyclopedia/index.html", {
         "form": NewTaskForm()
     })
+
+# Take user to random encyclopedia entry
+def random_page(request):
+    # Find all current encyclopedia entries
+    print("funtion called")
+    all_entries = util.list_entries()
+    print(all_entries)
+    print("%%%%%%%%%%%%")
+    # Pull random entry title
+    random_entry_title = random.choice(all_entries)
+    # Display entry
+    return view_entry(request, random_entry_title)
