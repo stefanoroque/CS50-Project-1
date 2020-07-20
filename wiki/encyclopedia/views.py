@@ -4,13 +4,18 @@ from . import util
 import markdown2
 import random
 
-class NewTaskForm(forms.Form):
+class NewSearchForm(forms.Form):
     entry_search = forms.CharField(label="Search Encyclopedia")
+
+class NewCreateForm(forms.Form):
+    title = forms.CharField(label="Page Title")
+    markdown_content = forms.CharField(label="Markdown Content")
+
 
 def index(request):
     return render(request, "encyclopedia/index.html", {
         "entries": util.list_entries(),
-        "form": NewTaskForm()
+        "search_form": NewSearchForm()
     })
 
 def view_entry(request, title):
@@ -20,13 +25,13 @@ def view_entry(request, title):
         return render(request, "encyclopedia/entry.html", {
         "entry": None,
         "title": title.capitalize(),
-        "form": NewTaskForm()
+        "search_form": NewSearchForm()
         })
     else:
         return render(request, "encyclopedia/entry.html", {
             "entry": markdown2.markdown(entry),
             "title": title.capitalize(),
-            "form": NewTaskForm()
+            "search_form": NewSearchForm()
         })
    
 # Search for an existing entry in the encyclopedia
@@ -35,7 +40,7 @@ def entry_search(request):
     if request.method == "POST":
 
         # Take in the data the user submitted and save it as form
-        form = NewTaskForm(request.POST)
+        form = NewSearchForm(request.POST)
 
         # Check if form data is valid (server-side)
         if form.is_valid():
@@ -61,35 +66,60 @@ def entry_search(request):
             if len(entry_subset) > 0: # We have some partial matches
                 return render(request, "encyclopedia/search_results.html", {
                     "entries": entry_subset,
-                    "form": NewTaskForm()
+                    "search_form": NewSearchForm()
                 })
                         
 
             # No matches
             return render(request, "encyclopedia/search_results.html", {
                     "entries": None,
-                    "form": NewTaskForm()
+                    "search_form": NewSearchForm()
                 })
 
         else:
 
             # If the form is invalid, re-render the page with existing information.
             return render(request, "encyclopedia/index.html", {
-                "form": form
+                "search_form": form
             })
 
     return render(request, "encyclopedia/index.html", {
-        "form": NewTaskForm()
+        "search_form": NewSearchForm()
     })
 
 # Take user to random encyclopedia entry
 def random_page(request):
     # Find all current encyclopedia entries
-    print("funtion called")
     all_entries = util.list_entries()
-    print(all_entries)
-    print("%%%%%%%%%%%%")
     # Pull random entry title
     random_entry_title = random.choice(all_entries)
     # Display entry
     return view_entry(request, random_entry_title)
+
+# Create a new encyclopedia entry
+def create_new_page(request):
+    if request.method == "POST":
+        # Take in the data the user submitted and save it as form
+        form = NewCreateForm(request.POST)
+
+        # Check if form data is valid (server-side)
+        if form.is_valid():
+
+            # Isolate the title and markdown content
+            title = form.cleaned_data["title"]
+            markdown_content = form.cleaned_data["markdown_content"]
+
+            print(title)
+            print(markdown_content)
+        
+        else:
+            # If the form is invalid, re-render the page with existing information.
+            return render(request, "encyclopedia/create.html", {
+                "create_form": form
+            })
+        
+
+    else:
+        return render(request, "encyclopedia/create.html", {
+            "create_form": NewCreateForm()
+        })
