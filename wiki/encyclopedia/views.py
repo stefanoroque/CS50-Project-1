@@ -9,7 +9,7 @@ class NewSearchForm(forms.Form):
 
 class NewCreateForm(forms.Form):
     title = forms.CharField(label="Page Title")
-    markdown_content = forms.CharField(label="Markdown Content")
+    markdown_content = forms.CharField(label = "Markdown Content", widget=forms.Textarea)
 
 
 def index(request):
@@ -106,20 +106,38 @@ def create_new_page(request):
         if form.is_valid():
 
             # Isolate the title and markdown content
-            title = form.cleaned_data["title"]
+            title = form.cleaned_data["title"].capitalize()
             markdown_content = form.cleaned_data["markdown_content"]
 
-            print(title)
-            print(markdown_content)
+            #TODO: fix text area appearance, its way too big
+
+
+
+
+            
+            # Check if encyclopedia entry already exists
+            if util.get_entry(title) is None:
+                # Save entry and bring user to the new entry's page
+                util.save_entry(title, markdown_content)
+                return view_entry(request, title)
+
+            # If entry already exists, present user with error message
+            else:
+                return render(request, "encyclopedia/error.html", {
+                    "message": "An encyclopedia entry already exists under this title",
+                    "search_form": NewSearchForm()
+                })
         
         else:
             # If the form is invalid, re-render the page with existing information.
             return render(request, "encyclopedia/create.html", {
-                "create_form": form
+                "create_form": form,
+                "search_form": NewSearchForm()
             })
         
 
     else:
         return render(request, "encyclopedia/create.html", {
-            "create_form": NewCreateForm()
+            "create_form": NewCreateForm(),
+            "search_form": NewSearchForm()
         })
