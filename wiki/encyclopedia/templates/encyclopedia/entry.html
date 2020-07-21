@@ -9,6 +9,9 @@
     <h1>Error: requested page cannot be found</h1>
     {% else %}
     <div>{{ entry |safe}}</div>
+
+    <a href="{% url 'encyclopedia:edit_page' title=title %}" class="button">Edit Page</a>
+    
     {% endif %}
 
 {% endblock %}

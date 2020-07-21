@@ -11,6 +11,8 @@ class NewCreateForm(forms.Form):
     title = forms.CharField(label="Page Title")
     markdown_content = forms.CharField(label = "Markdown Content", widget=forms.Textarea)
 
+class NewEditForm(forms.Form):
+    markdown_content = forms.CharField(label = "Markdown Content", widget=forms.Textarea)
 
 def index(request):
     return render(request, "encyclopedia/index.html", {
@@ -114,7 +116,7 @@ def create_new_page(request):
 
 
 
-            
+
             # Check if encyclopedia entry already exists
             if util.get_entry(title) is None:
                 # Save entry and bring user to the new entry's page
@@ -140,4 +142,43 @@ def create_new_page(request):
         return render(request, "encyclopedia/create.html", {
             "create_form": NewCreateForm(),
             "search_form": NewSearchForm()
+        })
+
+# Lets used edit entry's markdown content
+def edit_page(request, title):
+    markdown_content = util.get_entry(title)
+
+    if request.method == "POST":
+        # Take in the data the user submitted and save it as form
+        form = NewEditForm(request.POST)
+
+        # Check if form data is valid (server-side)
+        if form.is_valid():
+
+            # Isolate the markdown content
+            markdown_content = form.cleaned_data["markdown_content"]
+
+            #TODO: fix text area appearance, its way too big
+
+
+
+            # Save entry and bring user to the new entry's page
+            util.save_entry(title, markdown_content)
+            return view_entry(request, title)
+
+        
+        else:
+            # If the form is invalid, re-render the page with existing information.
+            return render(request, "encyclopedia/edit.html", {
+            "edit_form": form,
+            "search_form": NewSearchForm(),
+            "title": title
+        })
+        
+
+    else:
+        return render(request, "encyclopedia/edit.html", {
+            "edit_form": NewEditForm({'markdown_content': markdown_content}),
+            "search_form": NewSearchForm(),
+            "title": title
         })
