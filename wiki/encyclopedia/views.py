@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django import forms
 from . import util
 import markdown2
@@ -55,10 +55,10 @@ def entry_search(request):
             
             # Check for exact matches
             if search_keyword.upper() in (entry.upper() for entry in all_entries):
-                # Keyword matches exactly, render that page
-                return view_entry(request, search_keyword)
+                # Keyword matches exactly, redirect to that page
+                return redirect('/wiki/' + search_keyword)
+    
                 
-
             # Check for partial matches
             entry_subset = []
             for entry in all_entries:
@@ -96,7 +96,8 @@ def random_page(request):
     # Pull random entry title
     random_entry_title = random.choice(all_entries)
     # Display entry
-    return view_entry(request, random_entry_title)
+    #return view_entry(request, random_entry_title)
+    return redirect('/wiki/' + random_entry_title)
 
 # Create a new encyclopedia entry
 def create_new_page(request):
@@ -117,11 +118,11 @@ def create_new_page(request):
 
 
 
-            # Check if encyclopedia entry already exists
+            # Entry does not yet exist
             if util.get_entry(title) is None:
                 # Save entry and bring user to the new entry's page
                 util.save_entry(title, markdown_content)
-                return view_entry(request, title)
+                return redirect("/wiki/" + title)
 
             # If entry already exists, present user with error message
             else:
@@ -162,10 +163,9 @@ def edit_page(request, title):
 
 
 
-            # Save entry and bring user to the new entry's page
+            # Save entry and bring user to the entry's page
             util.save_entry(title, markdown_content)
-            return view_entry(request, title)
-
+            return redirect("/wiki/" + title)
         
         else:
             # If the form is invalid, re-render the page with existing information.
