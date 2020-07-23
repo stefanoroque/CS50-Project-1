@@ -10,7 +10,7 @@
     {% else %}
     <div>{{ entry |safe}}</div>
 
-    <a href="{% url 'encyclopedia:edit_page' title=title %}" class="button">Edit Page</a>
+    <a href="{% url 'encyclopedia:edit_page' title=title %}" class="btn btn-warning">Edit Page</a>
     
     {% endif %}
 

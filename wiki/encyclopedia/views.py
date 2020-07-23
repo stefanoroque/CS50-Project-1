@@ -8,11 +8,11 @@ class NewSearchForm(forms.Form):
     entry_search = forms.CharField(label="Search Encyclopedia")
 
 class NewCreateForm(forms.Form):
-    title = forms.CharField(label="Page Title")
-    markdown_content = forms.CharField(label = "Markdown Content", widget=forms.Textarea)
+    title = forms.CharField(label="Page Title", widget=forms.TextInput(attrs={'class' : 'form-control form-control-lg'}))
+    markdown_content = forms.CharField(label = "Markdown Content", widget=forms.Textarea(attrs={'class' : 'form-control'}))
 
 class NewEditForm(forms.Form):
-    markdown_content = forms.CharField(label = "Markdown Content", widget=forms.Textarea)
+    markdown_content = forms.CharField(label = "Markdown Content", widget=forms.Textarea(attrs={'class' : 'form-control'}))
 
 def index(request):
     return render(request, "encyclopedia/index.html", {
