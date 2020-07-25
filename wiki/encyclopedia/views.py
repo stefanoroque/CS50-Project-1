@@ -4,13 +4,16 @@ from . import util
 import markdown2
 import random
 
+# Form for searching the encyclopedia
 class NewSearchForm(forms.Form):
     entry_search = forms.CharField(label="Search Encyclopedia")
 
+# Form for creating a new entry in the encylopedia
 class NewCreateForm(forms.Form):
     title = forms.CharField(label="Page Title", widget=forms.TextInput(attrs={'class' : 'form-control form-control-lg'}))
     markdown_content = forms.CharField(label = "Markdown Content", widget=forms.Textarea(attrs={'class' : 'form-control'}))
 
+# Form for editing an entry in the encyclopedia
 class NewEditForm(forms.Form):
     markdown_content = forms.CharField(label = "Markdown Content", widget=forms.Textarea(attrs={'class' : 'form-control'}))
 
@@ -23,12 +26,15 @@ def index(request):
 def view_entry(request, title):
     entry = util.get_entry(title)
 
+    # Entry with this title does not exist
     if entry is None:
         return render(request, "encyclopedia/entry.html", {
         "entry": None,
         "title": title.capitalize(),
         "search_form": NewSearchForm()
         })
+
+    # Entry with this title exists
     else:
         return render(request, "encyclopedia/entry.html", {
             "entry": markdown2.markdown(entry),
@@ -58,7 +64,6 @@ def entry_search(request):
                 # Keyword matches exactly, redirect to that page
                 return redirect('/wiki/' + search_keyword)
     
-                
             # Check for partial matches
             entry_subset = []
             for entry in all_entries:
@@ -71,7 +76,6 @@ def entry_search(request):
                     "search_form": NewSearchForm()
                 })
                         
-
             # No matches
             return render(request, "encyclopedia/search_results.html", {
                     "entries": None,
@@ -79,7 +83,6 @@ def entry_search(request):
                 })
 
         else:
-
             # If the form is invalid, re-render the page with existing information.
             return render(request, "encyclopedia/index.html", {
                 "search_form": form
@@ -112,12 +115,6 @@ def create_new_page(request):
             title = form.cleaned_data["title"].capitalize()
             markdown_content = form.cleaned_data["markdown_content"]
 
-            #TODO: fix text area appearance, its way too big
-
-
-
-
-
             # Entry does not yet exist
             if util.get_entry(title) is None:
                 # Save entry and bring user to the new entry's page
@@ -149,6 +146,7 @@ def create_new_page(request):
 def edit_page(request, title):
     markdown_content = util.get_entry(title)
 
+    # Check if request method is post
     if request.method == "POST":
         # Take in the data the user submitted and save it as form
         form = NewEditForm(request.POST)
@@ -158,10 +156,6 @@ def edit_page(request, title):
 
             # Isolate the markdown content
             markdown_content = form.cleaned_data["markdown_content"]
-
-            #TODO: fix text area appearance, its way too big
-
-
 
             # Save entry and bring user to the entry's page
             util.save_entry(title, markdown_content)
